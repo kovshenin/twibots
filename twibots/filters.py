@@ -22,6 +22,7 @@ class InlineHashtags(tb.Filter):
 		and replace tags with hashtags, assuming they're listed in the tags
 		attribute of the Writable object.
 	"""
+	
 	def filter(self, writable):
 		original = writable.title
 		letters = list(original)
