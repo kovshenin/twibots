@@ -1,5 +1,6 @@
 import sys
 import shelve
+import time
 from twibots import tb, sources, filters, channels
 
 CONSUMER_KEY = 'cKlpH5jndEfrnhBQrrp8w'
@@ -35,5 +36,10 @@ rss = sources.RssFeed(feed_url='http://kovshenin.com/feed', count=10)
 twibot.sources.append(rss)
 twibot.channels.append(twitter)
 
-twibot.live()
+for life in twibot.live():
+	print "Twibot living, channel output: %s" % life
+	print "Resting ...\n"
+	time.sleep(60)
+	twibot.rest()
+	
 config.close()

@@ -11,7 +11,7 @@ class Twibot():
 		for source in self.sources:
 			for writable in source.read(): #has to yield
 				for channel in self.channels:
-					channel.write(writable)
+					yield channel.write(writable)
 		
 	def rest(self):
 		pass
