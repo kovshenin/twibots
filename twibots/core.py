@@ -31,7 +31,7 @@ class Writable():
 	def __str__(self):
 		return "Writable: %s" % ''.join(['\n\t%s=%s' % (k,repr(v)) for k,v in self.__dict__.iteritems()])
 	
-class Source():
+class Source(object):
 	"""
 		Sources can be anything, from RSS/Atom feeds to Twitter Searches,
 		Google News, etc. Make sure that Sources yield results when reading.
@@ -39,11 +39,11 @@ class Source():
 	def read(self):
 		raise NotImplementedError
 		
-class Filter():
+class Filter(object):
 	def filter(self):
 		raise NotImplementedError
 
-class Channel():
+class Channel(object):
 	filters = []
 	
 	def write(self):

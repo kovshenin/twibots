@@ -24,7 +24,11 @@ import time
 import logging
 
 # Non library modules
-from django.utils import simplejson
+try:
+	import simplejson
+except:
+	from django.utils import simplejson
+	
 import oauth2 as oauth
 
 # Taken from oauth implementation at: http://github.com/harperreed/twitteroauth-python/tree/master
@@ -310,5 +314,9 @@ class OAuthApi():
         Returns:
           Returns the twitter.User object
         '''
-        json = self._FetchUrl("https://api.twitter.com/1/" + call + ".json", type, parameters)
+        if call == 'search':
+            json = self._FetchUrl("https://search.twitter.com/" + call + ".json", type, parameters)
+        else:
+            json = self._FetchUrl("https://api.twitter.com/1/" + call + ".json", type, parameters)
+			
         return simplejson.loads(json)

@@ -10,7 +10,8 @@ print "1. Tweet hello world via Twibots"
 print "2. Tweet any text of your input"
 print "3. Tweet into two different Twitter accounts"
 print "4. Tweet 3 links from an RSS feed"
-print "5. Exit"
+print "5. Search and retweet something"
+print "6. Exit"
 print
 print "Choice: ",
 choice = sys.stdin.readline().strip()
@@ -96,14 +97,33 @@ def rss():
 		time.sleep(20)
 		
 	print "Done, exiting..."
-	
 
+def retweet():
+	print "Search and retweet, hmmm..."
+	print "Input keyword: ",
+	keyword = sys.stdin.readline().strip()
+	print "Cool, we'll search that for you and send out a couple of retweets"
+	
+	twitter = channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+	search = sources.TwitterSearch(q=keyword, count=2, consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+	rt = channels.TwitterRetweet(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+	
+	twibot = tb.Twibot()
+	twibot.sources.append(search)
+	twibot.channels.append(rt)
+	
+	for life in twibot.live():
+		print life
+		
+	print "Done, exiting..."
+	
 options = {
 	'1': hello_world,
 	'2': input_text,
 	'3': dual_account,
 	'4': rss,
-	'5': exit
+	'5': retweet,
+	'6': exit
 }
 
 options[choice]()

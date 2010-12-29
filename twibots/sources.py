@@ -1,4 +1,5 @@
 import core as tb
+import channels
 import extras.feedparser as feedparser
 
 class RssFeed(tb.Source):
@@ -28,7 +29,34 @@ class RssFeed(tb.Source):
 			)
 			yield writable
 
+class TwitterSearch(channels.Twitter):
+	def __init__(self, q, count=10, *args, **kwargs):
+		self.q = q
+		self.count = count
+		super(TwitterSearch, self).__init__(*args, **kwargs)
+	
+	def write(self):
+		raise NotImplementedError
+		
+	def read(self):
+		response = self.api.get('search', {'q': self.q, 'rpp': self.count})
+		results = response['results']
+		
+		for tweet in results:
+			writable = tb.Writable(title=tweet['text'], author=tweet['from_user'])
+			writable.tweet_id = tweet['id']
+			yield writable
+
 if __name__ == '__main__':
+	"""
 	feed = RssFeed(feed_url='http://techcrunch.com/feed')
 	for entry in feed.read():
 		print entry.title
+	"""
+	# Please don't abuse these
+	CONSUMER_KEY = 'cKlpH5jndEfrnhBQrrp8w'
+	CONSUMER_SECRET = 'reeYtKhTY7LRTwzXE5tmFrxwkD4lLVY9FgxrY5KFsE'
+
+	search = TwitterSearch(q='wordpress', count=5, consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+	for writable in search.read():
+		print writable

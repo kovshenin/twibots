@@ -5,7 +5,7 @@ import urllib2
 class TwitterInvalidVerifier(): pass
 class TwitterUnauthorized(): pass
 class TwitterNothingToTweet(): pass
-
+	
 class Twitter(tb.Channel):
 	"""
 		The main channel of all -- Twitter. This channel uses OAuth to authenticate
@@ -19,7 +19,7 @@ class Twitter(tb.Channel):
 		self.access_tokens = access_tokens
 		
 		if not access_tokens:
-			self.api = None
+			self.api = twitter.OAuthApi(self.consumer_key, self.consumer_secret)
 			self.authenticated = False
 		else:
 			self.authenticated = True
@@ -81,8 +81,12 @@ class Twitter(tb.Channel):
 		if not writable.output:
 			raise NothingToTweet
 		
-		self.api.post('statuses/update', {'status': writable.output.encode('utf-8')})
+		#self.api.post('statuses/update', {'status': writable.output.encode('utf-8')})
 		return "Tweeting (%s): %s" % (len(writable.output), writable.output)
+
+class TwitterRetweet(Twitter):
+	def write(self, writable):
+		print "Retweeting: %s" % writable.title
 
 # Self-test code.
 if __name__ == '__main__':
@@ -93,7 +97,7 @@ if __name__ == '__main__':
 	CONSUMER_SECRET = 'reeYtKhTY7LRTwzXE5tmFrxwkD4lLVY9FgxrY5KFsE'
 	
 	ch = Twitter(CONSUMER_KEY, CONSUMER_SECRET)
-
+	
 	print "Register here: %s" % ch.register()
 	print "Verification code: ",
 	oauth_verifier = sys.stdin.readline()
