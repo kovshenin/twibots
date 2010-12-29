@@ -80,45 +80,8 @@ class Twitter(tb.Channel):
 		"""
 		writable = self.filter(writable)
 		
-		# Hashify the hashtags (i.e. append hashes).
-		tags = []
-		for tag in writable.tags:
-			tags.append('#%s' % tag)
-
-		# This won't loop forever
-		while True:
-			# Loop while our length is not less or equal to max length
-			if self.length(writable.title, writable.permalink, tags) <= self.max_length:
-				break
-			
-			# Do we have any hashtags left?
-			if len(tags):
-				tags = tags[:-1]#.remove(len(writable.tags))
-				continue
-				
-			# Start shoreting the title (by removing single words)
-			if len(writable.title):
-				writable.title = ' '.join(writable.title.split()[:-1])
-				print 'stripping some title'
-				continue
-				
-			# If the statements above have failed to "continue", then the tweet
-			# cannot be reduced anymore, thus we state that the permalink is too long.
-			raise TwitterPermalinkTooLong
-
-		# Format the final string and tweet it.
-		final = ("%s %s %s" % (writable.title, writable.permalink, ' '.join(tags))).strip()
 		#self.api.post('statuses/update', {'status': final})
-		return "Tweeting (%s): %s" % (len(final), final)
-		
-	def length(self, title, permalink, tags=[]):
-		"""
-			This method is used to calculate the length of a certain tweet
-			based on the title, permalink and tag arguments supplied. Needs
-			refactoring.
-		"""
-		s = "%s %s %s" % (title, permalink, ' '.join(tags))
-		return len(s.strip())
+		return "Tweeting (%s): %s" % (len(writable.output), writable.output)
 
 # Self-test code.
 if __name__ == '__main__':

@@ -27,9 +27,10 @@ else:
 
 #twitter = channels.Twitter(consumer_key='cKlpH5jndEfrnhBQrrp8w', consumer_secret='reeYtKhTY7LRTwzXE5tmFrxwkD4lLVY9FgxrY5KFsE')
 
-twitter.max_length = 100 # Let's leave space for retweets with comments
-twitter.filters.append(filters.InlineHashtags())
 twitter.filters.append(filters.Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d'))
+twitter.filters.append(filters.InlineHashtags())
+twitter.filters.append(filters.TagsToHashtags())
+twitter.filters.append(filters.Trim140(max_length=70))
 
 rss = sources.RssFeed(feed_url='http://kovshenin.com/feed', count=10)
 
@@ -39,7 +40,7 @@ twibot.channels.append(twitter)
 for life in twibot.live():
 	print "Twibot living, channel output: %s" % life
 	print "Resting ...\n"
-	time.sleep(60)
+	time.sleep(1)
 	twibot.rest()
 	
 config.close()
