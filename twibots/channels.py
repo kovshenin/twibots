@@ -4,7 +4,7 @@ import urllib2
 
 class TwitterInvalidVerifier(): pass
 class TwitterUnauthorized(): pass
-class TwitterPermalinkTooLong(): pass
+class TwitterNothingToTweet(): pass
 
 class Twitter(tb.Channel):
 	"""
@@ -13,8 +13,7 @@ class Twitter(tb.Channel):
 		the registration process. Memorize the access_tokens returned by validate()
 		and use them when initializing Twitter() next time to restore the session.
 	"""
-	def __init__(self, consumer_key, consumer_secret, access_tokens=None, max_length=140):
-		self.max_length = max_length
+	def __init__(self, consumer_key, consumer_secret, access_tokens=None):
 		self.consumer_key = consumer_key
 		self.consumer_secret = consumer_secret
 		self.access_tokens = access_tokens
@@ -79,8 +78,10 @@ class Twitter(tb.Channel):
 			channel (inherited from tb.Channel).
 		"""
 		writable = self.filter(writable)
+		if not writable.output:
+			raise NothingToTweet
 		
-		#self.api.post('statuses/update', {'status': final})
+		self.api.post('statuses/update', {'status': writable.output.encode('utf-8')})
 		return "Tweeting (%s): %s" % (len(writable.output), writable.output)
 
 # Self-test code.
@@ -100,7 +101,6 @@ if __name__ == '__main__':
 		
 	print "You are now verified: @%s" % ch.screen_name
 
-	ch.max_length = 120
 	writable = tb.Writable(
 		title='Lorem Ipsum Dolor sit Amet',
 		excerpt='excerpt',

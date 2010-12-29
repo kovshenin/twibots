@@ -20,6 +20,7 @@ class RssFeed(tb.Source):
 			for tag in item.tags:
 				tags.append(tag['term'])
 
+
 			writable = tb.Writable(
 				title=item.title, 
 				permalink=item.link,
@@ -28,6 +29,6 @@ class RssFeed(tb.Source):
 			yield writable
 
 if __name__ == '__main__':
-	feed = RssFeed(feed_url='http://mashable.com/feed')
+	feed = RssFeed(feed_url='http://techcrunch.com/feed')
 	for entry in feed.read():
 		print entry.title

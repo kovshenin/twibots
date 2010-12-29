@@ -1187,7 +1187,7 @@ class _FeedParserMixin:
     def _start_title(self, attrsD):
         self.pushContent('title', attrsD, 'text/plain', self.infeed or self.inentry or self.insource)
     _start_dc_title = _start_title
-    _start_media_title = _start_title
+    #_start_media_title = _start_title
 
     def _end_title(self):
         value = self.popContent('title')
