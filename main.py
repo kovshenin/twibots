@@ -4,7 +4,10 @@ import random
 from twibots import tb, sources, filters, channels
 
 # Remove this line if you actually wanna tweet
-tb.Channel.fake = True
+if '--debug' in sys.argv:
+	tb.Channel.fake = True
+	print "Running in Debug mode"
+	print
 
 CONSUMER_KEY = 'Ai5tJWvg0UEnPNzOoDrP8A'
 CONSUMER_SECRET = 'LAWbNw7ovHBHES6ymBLCWjx28oZT3wLRRB8PBV7sk'
