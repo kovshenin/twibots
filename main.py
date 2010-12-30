@@ -106,10 +106,11 @@ def rss():
 		twibot.sources.append(sources.RssFeed(feed_url=url, count=3))
 
 	twibot.channels.append(twitter)
-	
 	while(True):
 		for life in twibot.live():
-			time.sleep(random.randrange(50,300))
+			interval = random.randrange(50,300)
+			print "Sleeping %s" % interval
+			time.sleep(interval)
 		
 	print "Done, exiting..."
 
