@@ -46,6 +46,7 @@ class Filter(object):
 
 class Channel(object):
 	filters = []
+	fake = False
 	
 	def write(self):
 		raise NotImplementedError

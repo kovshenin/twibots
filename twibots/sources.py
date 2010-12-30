@@ -1,23 +1,63 @@
+"""
+	General Sources for the Twibots Platform
+	Includes: RssFeed, TwitterSearch, DirectMessageControl
+	
+	Sources are simple classes, inherited from tb.Sources.
+	Every source should have a read() method that yields some result
+	or raises a StopIteration exception, since sources are used in
+	for loops inside the Twibot objects.
+	
+	Yielded objects should be constructed using the tb.Writable class.
+	Such objects can contain extra data besides the default attributes.
+	
+	Sources contain so-called actions, which are passed on to channels
+	using the writables they produce, for instance, if you'd like the
+	TwitterSearch source to retweet the found message and then follow
+	it's author, you should assign ['tweet', 'follow'] to the actions
+	list, which are appended to every writable it produces.
+	
+	When the Channels then receive such writables, they know exactly
+	what to do with each and every one of them.
+"""
+
 import core as tb
 import channels
 import extras.feedparser as feedparser
+from datetime import datetime
+import time
 
 class RssFeed(tb.Source):
+	"""
+		Uses feedparser.py to parse RSS and Atom feeds. We store a 
+		timestamp of the latest feed entry, so that older entries
+		are not parsed. This allows us not to repeat ourselves.
+	"""
 	def __init__(self, feed_url, count=5, actions=['default']):
+		"""
+			Initializing an RssFeed is easy, simply pass on the
+			feed_url and the number of entries you'd like to act upon.
+		"""
 		self.feed_url = feed_url
 		self.count = count
 		self.actions = actions
+		self.latest_timestamp = 0
 	
 	def read(self):
+		"""
+			This method is called by a Twibot. It parses the feed
+			entries, converts them into writables and yields the
+			results one by one.
+		"""
 		feed = feedparser.parse(self.feed_url)
-		i = 0
+		feed['entries'] = reversed(feed['entries'][:self.count])
+
 		for item in feed['entries']:
-			
-			# Let's see if we got more than self.count allowed.
-			i += 1
-			if i > self.count:
-				raise StopIteration
-			
+
+			if self.latest_timestamp < time.mktime(item.updated_parsed):
+				self.latest_timestamp = time.mktime(item.updated_parsed)
+			else:
+				continue
+				
 			tags = []
 			for tag in item.tags:
 				tags.append(tag['term'])
@@ -33,18 +73,20 @@ class RssFeed(tb.Source):
 			yield writable
 
 class TwitterSearch(tb.Source):
+	"""
+	
+	"""
 	def __init__(self, twitter, q, count=10, actions=['default']):
 		self.q = q
 		self.count = count
 		self.api = twitter.api
 		self.actions = actions
-		#super(TwitterSearch, self).__init__(*args, **kwargs)
-	
-	def write(self):
-		raise NotImplementedError
 		
+		self.max_id = 0
+	
 	def read(self):
-		response = self.api.get('search', {'q': self.q, 'rpp': self.count})
+		response = self.api.get('search', {'q': self.q, 'rpp': self.count, 'since_id': self.max_id})
+		self.max_id= response['max_id']
 		results = response['results']
 		
 		for tweet in results:
@@ -54,15 +96,19 @@ class TwitterSearch(tb.Source):
 			yield writable
 
 if __name__ == '__main__':
-	"""
-	feed = RssFeed(feed_url='http://techcrunch.com/feed')
-	for entry in feed.read():
-		print entry.title
-	"""
+	feed = RssFeed(feed_url='http://www.free-lance.ru/rss/all.xml')
+	while(True):
+		for entry in feed.read():
+			print entry.title
+			
+		time.sleep(1)
+		
+	exit()
+	
 	# Please don't abuse these
 	CONSUMER_KEY = 'cKlpH5jndEfrnhBQrrp8w'
 	CONSUMER_SECRET = 'reeYtKhTY7LRTwzXE5tmFrxwkD4lLVY9FgxrY5KFsE'
-
-	search = TwitterSearch(q='wordpress', count=5, consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+	twitter = channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+	search = TwitterSearch(twitter, q='#wordpress', count=5)
 	for writable in search.read():
 		print writable

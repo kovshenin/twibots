@@ -15,6 +15,34 @@ class Bitly(tb.Filter):
 			writable.permalink = response['data']['url']
 
 		return writable
+		
+class NoRetweets(tb.Filter):
+	def filter(self, writable):
+		if 'rt' in writable.title.lower().split():
+			return tb.Writable()
+		else:
+			return writable
+			
+class NoLinks(tb.Filter):
+	def filter(self, writable):
+		if 'http://' in writable.title.lower():
+			return tb.Writable()
+		else:
+			return writable
+			
+class NoMentioins(tb.Filter):
+	def filter(self, writable):
+		if '@' in writable.title:
+			return tb.Writable()
+		else:
+			return writable
+			
+class NoHashtags(tb.Filter):
+	def filter(self, writable):
+		if '#' in writable.title:
+			return tb.Writable()
+		else:
+			return writable
 
 class TagsToHashtags(tb.Filter):
 	"""

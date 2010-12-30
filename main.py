@@ -1,6 +1,10 @@
 import sys
 import time
+import random
 from twibots import tb, sources, filters, channels
+
+# Remove this line if you actually wanna tweet
+tb.Channel.fake = True
 
 CONSUMER_KEY = 'cKlpH5jndEfrnhBQrrp8w'
 CONSUMER_SECRET = 'reeYtKhTY7LRTwzXE5tmFrxwkD4lLVY9FgxrY5KFsE'
@@ -9,9 +13,9 @@ print "Welcome to Twibots, please pick one of the options below"
 print "1. Tweet hello world via Twibots"
 print "2. Tweet any text of your input"
 print "3. Tweet into two different Twitter accounts"
-print "4. Tweet 3 links from an RSS feed"
+print "4. Tweet links from an RSS feed"
 print "5. Search and retweet something"
-print "6. Exit"
+print "0. Exit"
 print
 print "Choice: ",
 choice = sys.stdin.readline().strip()
@@ -71,12 +75,18 @@ def dual_account():
 	print "Done, exiting..."
 	
 def rss():
-	print "And now an RSS feed, input the URL to an RSS feed"
-	print "RSS URL: ",
+	print "And now an RSS feed, input some RSS feed URLs and type 'go' when you're ready."
 	
-	url = sys.stdin.readline().strip()
+	rss_sources = []
+	while True:
+		print "RSS URL: ",
+		url = sys.stdin.readline().strip()
+		if url != 'go':
+			rss_sources.append(url)
+		else:
+			break
 	
-	print "Cool, gathering some info... Will tweet 3 links with a 20 seconds interval."
+	print "Cool, gathering some info... Will tweet links with a 30 seconds interval."
 	print "Note that we also use a few filters here: bitly, inline hashtags, tags2hashtags and the trim140 filter set at 100 length"
 	
 	twibot = tb.Twibot()
@@ -87,14 +97,16 @@ def rss():
 	twitter.filters.append(filters.TagsToHashtags())
 	twitter.filters.append(filters.Trim140(max_length=100))
 
-	rss = sources.RssFeed(feed_url=url, count=3)
-	
-	twibot.sources.append(rss)
+	# Let's make a list of a few sources
+	#rss_sources = ["http://mashable.com/feed", "http://kovshenin.com/feed", "http://techcrunch.com/feed", "http://smashingmagazine.com/feed"]
+	for url in rss_sources:
+		twibot.sources.append(sources.RssFeed(feed_url=url, count=3))
+
 	twibot.channels.append(twitter)
 	
-	for life in twibot.live():
-		print life
-		time.sleep(20)
+	while(True):
+		for life in twibot.live():
+			time.sleep(random.randrange(50,300))
 		
 	print "Done, exiting..."
 
@@ -105,15 +117,18 @@ def retweet():
 	print "Cool, we'll search that for you and send out a couple of retweets"
 	
 	twitter = channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+	twitter.filters.append(filters.NoRetweets())
+	
 	search = sources.TwitterSearch(twitter, q=keyword, count=2)
-	search.actions = ['retweet', 'follow']
+	search.actions = ['retweet']
 
 	twibot = tb.Twibot()
 	twibot.sources.append(search)
 	twibot.channels.append(twitter)
 
-	for life in twibot.live():
-		print life
+	while(True):
+		for life in twibot.live():
+			time.sleep(5)
 		
 	print "Done, exiting..."
 	
@@ -123,7 +138,7 @@ options = {
 	'3': dual_account,
 	'4': rss,
 	'5': retweet,
-	'6': exit
+	'0': exit
 }
 
 options[choice]()

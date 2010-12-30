@@ -102,29 +102,35 @@ class Twitter(tb.Channel):
 		except:
 			raise TwitterNothingToTweet
 		
-		#self.api.post('statuses/update', {'status': writable.output.encode('utf-8')})
-		print "Tweeting (%s): %s" % (len(writable.output), writable.output)
+		if self.fake:
+			print "Tweeting (%s): %s" % (len(writable.output), writable.output)
+		else:
+			self.api.post('statuses/update', {'status': writable.output.encode('utf-8')})
+		
 
 	def retweet(self, writable):
 		"""
 			Retweets a message in the writable, tweet_id has to be present
 			in the writable.
 		"""
-		print "Retweeting: RT @%s %s" % (writable.author, writable.title)
+		if self.fake:
+			print "Retweeting @%s: %s" % (writable.author, writable.title)
 
 	def list(self, writable):
 		"""
 			Lists a user to a specific list, list_name has to be present
 			in the writable.
 		"""
-		print "Listing: @%s" % writable.author
+		if self.fake:
+			print "Listing: @%s" % writable.author
 		
 	def follow(self, writable):
 		"""
 			Follows a user, author or author_id has to be present in
 			the writable.
 		"""
-		print "Following: @%s" % writable.author
+		if self.fake:
+			print "Following: @%s" % writable.author
 	
 # Self-test code.
 if __name__ == '__main__':
