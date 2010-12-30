@@ -137,8 +137,8 @@ if __name__ == '__main__':
 	import sys
 
 	# Please don't abuse these
-	CONSUMER_KEY = 'cKlpH5jndEfrnhBQrrp8w'
-	CONSUMER_SECRET = 'reeYtKhTY7LRTwzXE5tmFrxwkD4lLVY9FgxrY5KFsE'
+	CONSUMER_KEY = 'Ai5tJWvg0UEnPNzOoDrP8A'
+	CONSUMER_SECRET = 'LAWbNw7ovHBHES6ymBLCWjx28oZT3wLRRB8PBV7sk'
 	
 	ch = Twitter(CONSUMER_KEY, CONSUMER_SECRET)
 	"""
