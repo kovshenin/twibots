@@ -59,8 +59,11 @@ class RssFeed(tb.Source):
 				continue
 				
 			tags = []
-			for tag in item.tags:
-				tags.append(tag['term'])
+			try:
+				for tag in item.tags:
+					tags.append(tag['term'])
+			except:
+				pass
 
 			writable = tb.Writable(
 				title=item.title, 
