@@ -27,6 +27,7 @@ class Writable():
 		self.permalink = permalink
 		self.author = author
 		self.tags = tags
+		self.actions = []
 		
 	def __str__(self):
 		return "Writable: %s" % ''.join(['\n\t%s=%s' % (k,repr(v)) for k,v in self.__dict__.iteritems()])

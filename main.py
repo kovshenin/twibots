@@ -99,19 +99,19 @@ def rss():
 	print "Done, exiting..."
 
 def retweet():
-	print "Search and retweet, hmmm..."
+	print "Search, retweet and follow, hmmm..."
 	print "Input keyword: ",
 	keyword = sys.stdin.readline().strip()
 	print "Cool, we'll search that for you and send out a couple of retweets"
 	
 	twitter = channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
-	search = sources.TwitterSearch(q=keyword, count=2, consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
-	rt = channels.TwitterRetweet(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
-	
+	search = sources.TwitterSearch(twitter, q=keyword, count=2)
+	search.actions = ['retweet', 'follow']
+
 	twibot = tb.Twibot()
 	twibot.sources.append(search)
-	twibot.channels.append(rt)
-	
+	twibot.channels.append(twitter)
+
 	for life in twibot.live():
 		print life
 		

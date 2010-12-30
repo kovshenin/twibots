@@ -3,9 +3,10 @@ import channels
 import extras.feedparser as feedparser
 
 class RssFeed(tb.Source):
-	def __init__(self, feed_url, count=5):
+	def __init__(self, feed_url, count=5, actions=['default']):
 		self.feed_url = feed_url
 		self.count = count
+		self.actions = actions
 	
 	def read(self):
 		feed = feedparser.parse(self.feed_url)
@@ -21,19 +22,23 @@ class RssFeed(tb.Source):
 			for tag in item.tags:
 				tags.append(tag['term'])
 
-
 			writable = tb.Writable(
 				title=item.title, 
 				permalink=item.link,
 				tags=tags
 			)
+			
+			writable.actions = self.actions
+			
 			yield writable
 
-class TwitterSearch(channels.Twitter):
-	def __init__(self, q, count=10, *args, **kwargs):
+class TwitterSearch(tb.Source):
+	def __init__(self, twitter, q, count=10, actions=['default']):
 		self.q = q
 		self.count = count
-		super(TwitterSearch, self).__init__(*args, **kwargs)
+		self.api = twitter.api
+		self.actions = actions
+		#super(TwitterSearch, self).__init__(*args, **kwargs)
 	
 	def write(self):
 		raise NotImplementedError
@@ -45,6 +50,7 @@ class TwitterSearch(channels.Twitter):
 		for tweet in results:
 			writable = tb.Writable(title=tweet['text'], author=tweet['from_user'])
 			writable.tweet_id = tweet['id']
+			writable.actions = self.actions
 			yield writable
 
 if __name__ == '__main__':
