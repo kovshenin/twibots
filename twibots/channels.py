@@ -35,6 +35,7 @@ class Twitter(tb.Channel):
 		"""
 		try:
 			self.api('account/verify_credentials')
+			return True
 		except urllib2.HTTPError:
 			raise TwitterUnauthorized
 
@@ -96,15 +97,14 @@ class Twitter(tb.Channel):
 		"""
 			Writes a tweet invoking statuses/update call.
 		"""
+		print "Tweeting (%s): %s" % (len(writable.output), writable.output)
 		try:
 			if not writable.output:
 				raise TwitterNothingToTweet
 		except:
 			raise TwitterNothingToTweet
 		
-		if self.fake:
-			print "Tweeting (%s): %s" % (len(writable.output), writable.output)
-		else:
+		if not self.fake:
 			self.api.post('statuses/update', {'status': writable.output.encode('utf-8')})
 		
 
@@ -129,8 +129,13 @@ class Twitter(tb.Channel):
 			Follows a user, author or author_id has to be present in
 			the writable.
 		"""
-		if self.fake:
-			print "Following: @%s" % writable.author
+		print "Following: @%s" % writable.author
+		if not self.fake:
+			try:
+				self.api.post('friendships/create', {'screen_name': writable.author})
+			except urllib2.HTTPError:
+				pass # 403 -- already following
+			
 	
 # Self-test code.
 if __name__ == '__main__':

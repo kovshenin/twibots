@@ -40,7 +40,7 @@ class RssFeed(tb.Source):
 		self.feed_url = feed_url
 		self.count = count
 		self.actions = actions
-		self.latest_timestamp = 0
+		self.cache = []
 	
 	def read(self):
 		"""
@@ -48,16 +48,26 @@ class RssFeed(tb.Source):
 			entries, converts them into writables and yields the
 			results one by one.
 		"""
-		feed = feedparser.parse(self.feed_url)
-		feed['entries'] = reversed(feed['entries'][:self.count])
 
+		# Clear cache
+		if len(self.cache) > 20:
+			self.cache = self.cache[-10:]
+
+		print "Reading RSS Feed"
+		feed = feedparser.parse(self.feed_url)
+		if not len(feed['entries']):
+			print "There's something wrong with the feed"
+			raise StopIteration
+
+		feed['entries'] = reversed(feed['entries'][:self.count])
+		
 		for item in feed['entries']:
 
-			if self.latest_timestamp < time.mktime(item.updated_parsed):
-				self.latest_timestamp = time.mktime(item.updated_parsed)
-			else:
+			if item.title in self.cache:
 				continue
 				
+			self.cache.append(item.title)
+
 			tags = []
 			try:
 				for tag in item.tags:
@@ -84,7 +94,6 @@ class TwitterSearch(tb.Source):
 		self.count = count
 		self.api = twitter.api
 		self.actions = actions
-		
 		self.max_id = 0
 	
 	def read(self):
@@ -99,7 +108,7 @@ class TwitterSearch(tb.Source):
 			yield writable
 
 if __name__ == '__main__':
-	feed = RssFeed(feed_url='http://www.free-lance.ru/rss/all.xml')
+	feed = RssFeed(feed_url='http://news.google.com/news?pz=1&cf=all&ned=us&hl=en&q=google+nexus&cf=all&scoring=n&output=rss')
 	while(True):
 		for entry in feed.read():
 			print entry.title

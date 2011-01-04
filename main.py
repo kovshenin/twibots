@@ -1,6 +1,7 @@
 import sys
 import time
 import random
+import simplejson
 from twibots import tb, sources, filters, channels
 
 # Remove this line if you actually wanna tweet
@@ -8,6 +9,18 @@ if '--debug' in sys.argv:
 	tb.Channel.fake = True
 	print "Running in Debug mode"
 	print
+	
+access_tokens = None
+if '--auth' in sys.argv:
+	f = sys.argv[sys.argv.index('--auth')+1]
+	print "Using authentication file: %s" % f
+	try:
+		auth = file(f)
+		access_tokens = simplejson.load(auth)
+		auth.close()
+	except:
+		access_tokens = None
+		print "Authentication failed"
 
 CONSUMER_KEY = 'Ai5tJWvg0UEnPNzOoDrP8A'
 CONSUMER_SECRET = 'LAWbNw7ovHBHES6ymBLCWjx28oZT3wLRRB8PBV7sk'
@@ -24,13 +37,37 @@ print "Choice: ",
 choice = sys.stdin.readline().strip()
 print
 
-def twitter_auth():
+def twitter_auth(try_auth_file=True):
+	
+	if try_auth_file:
+		global access_tokens
+		if access_tokens:
+			twitter = channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET, access_tokens=access_tokens)
+			if twitter.verify_credentials():
+				print "Auth file accepted, proceeding"
+				return twitter
+				
+			else:
+				print "Auth file invalid, going manual"
+	
+	if tb.Channel.fake:
+		return channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
+
 	twitter = channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
 	print "Register here: %s" % twitter.register()
 	print "Verification code: ",
 	oauth_verifier = sys.stdin.readline()
 	twitter.validate(oauth_verifier.strip())
 	print "You are now verified: @%s" % twitter.screen_name
+	print "Would you like to save your tokens? (yes/no): ",
+	choice = sys.stdin.readline().strip()
+	
+	if choice == 'yes':
+		print "Input filename: ",
+		filename = sys.stdin.readline().strip()
+		f = file(filename, 'w')
+		simplejson.dump(twitter.access_tokens, f)
+		f.close()
 	
 	return twitter
 
@@ -53,6 +90,7 @@ def input_text():
 	
 	writable = tb.Writable()
 	writable.output = text
+	writable.actions = ['default']
 	print "Tweeting: %s" % text
 	twitter.write(writable)
 	
@@ -103,14 +141,27 @@ def rss():
 	# Let's make a list of a few sources
 	#rss_sources = ["http://mashable.com/feed", "http://kovshenin.com/feed", "http://techcrunch.com/feed", "http://smashingmagazine.com/feed"]
 	for url in rss_sources:
-		twibot.sources.append(sources.RssFeed(feed_url=url, count=3))
+		twibot.sources.append(sources.RssFeed(feed_url=url, count=5))
+		
+	# Let's also run a Twitter search and follow some users
+	search = sources.TwitterSearch(twitter, q='#nexus OR #android', count=2)
+	search.actions = ['follow']
+	
+	twibot.sources.append(search)
 
 	twibot.channels.append(twitter)
 	while(True):
-		for life in twibot.live():
-			interval = random.randrange(50,300)
-			print "Sleeping %s" % interval
-			time.sleep(interval)
+		try:
+			for life in twibot.live():
+				interval = random.randrange(60,300)
+				print "Sleeping %s" % interval
+				time.sleep(interval)
+			else:
+				interval = random.randrange(60,300)
+				print "Sleeping %s" % interval
+				time.sleep(interval)
+		except:
+			print "Some error occoured, skipping one life cycle"
 		
 	print "Done, exiting..."
 

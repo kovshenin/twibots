@@ -66,19 +66,26 @@ class InlineHashtags(tb.Filter):
 		and replace tags with hashtags, assuming they're listed in the tags
 		attribute of the Writable object. The returned writable object's tags
 		attribute is left with tags that were not replaced inline (remaining).
+		
+		Additional tags could be passed to the filter duruing __init__, these
+		will not be appended to the final writable.tags list (remaining) but
+		will be inlined.
 	"""
+	def __init__(self, additional_tags=[]):
+		self.additional_tags = additional_tags
 	
 	def filter(self, writable):
 		original = writable.title
 		letters = list(original)
 		remaining = []
-		for tag in writable.tags:
+		for tag in writable.tags + self.additional_tags:
 			pos = original.lower().find(tag)
 			if pos > -1:
 				letters.insert(pos, '#')
 				original = ''.join(letters)
 			else:
-				remaining.append(tag)
+				if tag in writable.tags:
+					remaining.append(tag)
 				
 		writable.title = ''.join(letters)
 		writable.tags = remaining

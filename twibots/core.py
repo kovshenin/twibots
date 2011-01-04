@@ -13,6 +13,8 @@ class Twibot():
 				for channel in self.channels:
 					yield channel.write(writable)
 		
+		raise StopIteration
+
 	def rest(self):
 		pass
 
