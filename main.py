@@ -133,18 +133,27 @@ def rss():
 	twibot = tb.Twibot()
 	twitter = twitter_auth()
 	
+	print "Great. We'll also let you define additional hashtags that will apply to inline only. Write them down, comma separated, no spaces"
+	print "Additional hashtags: ",
+	at = sys.stdin.readline().strip().split(',')
+	
 	twitter.filters.append(filters.Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d'))
-	twitter.filters.append(filters.InlineHashtags())
+	twitter.filters.append(filters.InlineHashtags(additional_tags=at))
 	twitter.filters.append(filters.TagsToHashtags())
 	twitter.filters.append(filters.Trim140(max_length=100))
 
-	# Let's make a list of a few sources
-	#rss_sources = ["http://mashable.com/feed", "http://kovshenin.com/feed", "http://techcrunch.com/feed", "http://smashingmagazine.com/feed"]
+	# Append our sources
 	for url in rss_sources:
 		twibot.sources.append(sources.RssFeed(feed_url=url, count=5))
 		
+	
+	print "We'll let you search a keyword and follow users tweeting it"
+	print "Keyword: ",
+	
+	kw = sys.stdin.readline().strip()
+	
 	# Let's also run a Twitter search and follow some users
-	search = sources.TwitterSearch(twitter, q='#nexus OR #android', count=2)
+	search = sources.TwitterSearch(twitter, q=kw, count=2)
 	search.actions = ['follow']
 	
 	twibot.sources.append(search)
@@ -160,6 +169,9 @@ def rss():
 				interval = random.randrange(60,300)
 				print "Sleeping %s" % interval
 				time.sleep(interval)
+		except KeyboardInterrupt:
+			print "Quitting"
+			exit()
 		except:
 			print "Some error occoured, skipping one life cycle"
 		

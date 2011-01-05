@@ -54,7 +54,8 @@ class TagsToHashtags(tb.Filter):
 	def filter(self, writable):
 		tags = []
 		for tag in writable.tags:
-			tags.append('#%s' % tag)
+			if ' ' not in tag and '-' not in tag:
+				tags.append('#%s' % tag.lower())
 			
 		writable.tags = tags
 		return writable
@@ -79,6 +80,11 @@ class InlineHashtags(tb.Filter):
 		letters = list(original)
 		remaining = []
 		for tag in writable.tags + self.additional_tags:
+			
+			# Let's see if there's already such a hashtag in the title
+			if '#%s' % tag in original.lower():
+				continue
+			
 			pos = original.lower().find(tag)
 			if pos > -1:
 				letters.insert(pos, '#')
@@ -145,7 +151,7 @@ if __name__ == '__main__':
 	t2h = TagsToHashtags()
 	inline = InlineHashtags()
 	
-	writable = tb.Writable(title="Lorem Ipsum Dolor Sit Amet, Bleh Beh Meh Dududeh Lorem Ipsum Dolor sit Amet Good Bad TechCrunch Mashable", excerpt="Excerpt", content="Content", tags=['lorem', 'dolor', 'google', 'boogle', 'nice', 'tech'], permalink='http://kovshenin.com')
+	writable = tb.Writable(title="#Mashable", excerpt="Excerpt", content="Content", tags=['mashable awards', 'lorem', 'dolor', 'Google', 'boogle', 'nice', 'tech'], permalink='http://kovshenin.com')
 	writable = inline.filter(writable)
 	writable = t2h.filter(writable)
 	writable = trim.filter(writable)
