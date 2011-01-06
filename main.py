@@ -137,6 +137,8 @@ def rss():
 	print "Additional hashtags: ",
 	at = sys.stdin.readline().strip().split(',')
 	
+	twitter.filters.append(filters.NoRetweets())
+	twitter.filters.append(filters.NoDuplicates())
 	twitter.filters.append(filters.Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d'))
 	twitter.filters.append(filters.InlineHashtags(additional_tags=at))
 	twitter.filters.append(filters.TagsToHashtags())

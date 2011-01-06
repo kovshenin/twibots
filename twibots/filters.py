@@ -23,6 +23,29 @@ class NoRetweets(tb.Filter):
 		else:
 			return writable
 			
+class NoDuplicates(tb.Filter):
+	"""
+		Requires the Levenshtein module.
+	"""
+	def __init__(self, threshold=0.60, cache_size=200):
+		self.threshold = threshold
+		self.cache = []
+		self.cache_size = cache_size
+
+	def filter(self, writable):
+		import Levenshtein
+		
+		if len(self.cache) > self.cache_size:
+			self.cache = self.cache[-self.cache_size:]
+		
+		for item in self.cache:
+			if Levenshtein.ratio(str(item), str(writable.title)) > self.threshold:
+				print "Duplicate detected: \"%s\" matched \"s%s\" with a score of %s" % (writable.title, item, Levenshtein.ratio(str(item), str(writable.title)))
+				return tb.Writable()
+				
+		self.cache.append(writable.title)
+		return writable
+		
 class NoLinks(tb.Filter):
 	def filter(self, writable):
 		if 'http://' in writable.title.lower():
@@ -143,10 +166,55 @@ class Trim140(tb.Filter):
 
 # Self-test code.
 if __name__ == '__main__':
+	# Bitly
+	print "Bitly()"
 	bitly = Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d')
 	writable = tb.Writable(permalink='http://kovshenin.com')
-	print bitly.filter(writable)
-
+	print "Long link: http://kovshenin.com"
+	print "Shortened: %s" % bitly.filter(writable).permalink
+	print
+	
+	# NoRetweets
+	print "NoRetweets()"
+	writables = [tb.Writable(title="Text"), tb.Writable(title="RT Text"), tb.Writable(title="rt text"), tb.Writable(title="rting text")]
+	nort = NoRetweets()
+	print "Input:"
+	for writable in writables:
+		print "\t%s" % writable.title
+		
+	print "Output:"
+	for writable in writables:
+		writable = nort.filter(writable)
+		if writable.title:
+			print "\t%s" %  writable.title
+			
+	print
+	
+	# NoDuplicates
+	print "NoDuplicates()"
+	writables = [
+		tb.Writable(title="8 Gadgets to Watch in 2011 - http://on.mash.to/giO5HX"),
+		tb.Writable(title="Creating a safer email environment http://bit.ly/fk34LG #admin"),
+		tb.Writable(title="LivingSocial: #Groupon's Not The Only Company That Can Hire A CFO http://tcrn.ch/fc1xne #tc"),
+		tb.Writable(title="#Android App Development - Using Android resources part 1: String Resources http://bit.ly/gRKe52"),
+		tb.Writable(title="RT @mashable: 8 #Gadgets to Watch in 2011 - http://bit.ly/123456"),
+		tb.Writable(title="LivingSocial: Groupon Can Hire a Company CFO: http://bit.ly/99921"),
+	]
+	nodups = NoDuplicates()
+	print "Input:"
+	for writable in writables:
+		print "\t%s" % writable.title
+		
+	print "Output:"
+	for writable in writables:
+		writable = nodups.filter(writable)
+		if writable.title:
+			print "\t%s" %  writable.title
+			
+	print
+	
+	exit()
+	
 	trim = Trim140(max_length=120)
 	t2h = TagsToHashtags()
 	inline = InlineHashtags()
