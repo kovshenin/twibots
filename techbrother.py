@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 """
 	Twibots @techbrother Example
 	
