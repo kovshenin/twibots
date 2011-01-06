@@ -20,6 +20,7 @@
 	what to do with each and every one of them.
 """
 
+import logging
 import core as tb
 import channels
 import extras.feedparser as feedparser
@@ -53,10 +54,10 @@ class RssFeed(tb.Source):
 		if len(self.cache) > 20:
 			self.cache = self.cache[-10:]
 
-		print "Reading RSS Feed"
+		logging.debug("Reading RSS Feed: %s" % self.feed_url)
 		feed = feedparser.parse(self.feed_url)
 		if not len(feed['entries']):
-			print "There's something wrong with the feed"
+			logging.error("There's something wrong with the feed: %s" % self.feed_url)
 			raise StopIteration
 
 		feed['entries'] = reversed(feed['entries'][:self.count])

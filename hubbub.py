@@ -1,30 +1,43 @@
+"""
+	Twibots PubSubHubBub Example
+	
+	This has to be used in pair with a subscriber (see HubBub definition). The
+	subscriber, which can be a simple PHP or Python script running on a server
+	that could be reached by a Hub, receives "pings" from the Hubs which means
+	there's new content. At this stage you should fire this script:
+	
+	 $ cd /path/to/twibots && python hubbub.py --auth whatever.auth --cache whatever.cache
+	 
+	 Caching to file is used in this example since it's not an on-going daemon,
+	 it exists after tweeting a couple of entries from the feed.
+	 
+	 If you don't have an .auth file, use the auth.py script to generate one.
+"""
 import sys
 import time
 import random
 import simplejson
 from twibots import tb, sources, filters, channels
+from twibots import tools
 
+# Log everything into a file.
 log_file = file("log.txt", "a+")
 sys.stdout = log_file
 
-# Remove this line if you actually wanna tweet
-if '--debug' in sys.argv:
-	tb.Channel.fake = True
-	print "Running in Debug mode"
-	print
-	
-access_tokens = None
-if '--auth' in sys.argv:
-	f = sys.argv[sys.argv.index('--auth')+1]
-	print "Using authentication file: %s" % f
-	try:
-		auth = file(f)
-		access_tokens = simplejson.load(auth)
-		auth.close()
-	except:
-		access_tokens = None
-		print "Authentication failed!"
-		
+# Enable the --debug key.
+tools.enable_debug()
+
+# Enable the --auth "authfile.auth" key and read values.
+access_tokens = tools.file_auth()
+
+# Try the access values, create a twitter object. If access credentials
+# are invalid, this will take you through the OAuth registration
+# process and ask to save tokens to file at the end.
+twitter = tools.twitter_auth(access_tokens)
+
+# Let's look for the --cache "file.cache" key in the command line args.
+# If they exist we can load the cache data from the file, otherwise
+# use it later to save the cache.
 if '--cache' in sys.argv:
 	cache_filename = sys.argv[sys.argv.index('--cache')+1]
 	print "Using cache file: %s" % cache_filename
@@ -36,44 +49,33 @@ if '--cache' in sys.argv:
 		cache_values = []
 		print "Cache load failed (empty?)"
 
-CONSUMER_KEY = 'Ai5tJWvg0UEnPNzOoDrP8A'
-CONSUMER_SECRET = 'LAWbNw7ovHBHES6ymBLCWjx28oZT3wLRRB8PBV7sk'
-
-def twitter_auth(try_auth_file=True):
-	if try_auth_file:
-		global access_tokens
-		if access_tokens:
-			twitter = channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET, access_tokens=access_tokens)
-			if twitter.verify_credentials():
-				print "Auth file accepted, proceeding"
-				return twitter
-				
-	print "Invalid authentication, exiting."
-	exit()
-
+# Create the Twibot.
 twibot = tb.Twibot()
-twitter = twitter_auth()
-nodups = filters.NoDuplicates()
 
+# Create the NoDuplicates filter and load up the cache values.
+nodups = filters.NoDuplicates()
 nodups.cache = cache_values
 
+# Append some filters including the no duplicates filter.
 twitter.filters.append(nodups)
 twitter.filters.append(filters.Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d'))
 twitter.filters.append(filters.InlineHashtags())
 twitter.filters.append(filters.TagsToHashtags())
 twitter.filters.append(filters.Trim140(max_length=100))
 
-rss = sources.RssFeed(feed_url='http://www.google.com/reader/public/atom/user/08886841141873836783/state/com.google/broadcast', count=1)
+# Create an RSS feed source (Atom).
+rss = sources.RssFeed(feed_url='http://www.google.com/reader/public/atom/user/08886841141873836783/state/com.google/broadcast', count=2)
 
-# Append our sources
+# Append our sources and channels
 twibot.sources.append(rss)
 twibot.channels.append(twitter)
+
+# Behold!
 for life in twibot.live():
 	pass
-	
+
+# Let's save the cache into the given file.
 print "Saving cache.."
 f = file(cache_filename, 'w')
 simplejson.dump(nodups.cache, f)
 f.close()
-
-print "Done, exiting..."

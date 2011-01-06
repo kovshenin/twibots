@@ -3,117 +3,20 @@ import time
 import random
 import simplejson
 from twibots import tb, sources, filters, channels
+from twibots import tools
 
-# Remove this line if you actually wanna tweet
-if '--debug' in sys.argv:
-	tb.Channel.fake = True
-	print "Running in Debug mode"
-	print
-	
-access_tokens = None
-if '--auth' in sys.argv:
-	f = sys.argv[sys.argv.index('--auth')+1]
-	print "Using authentication file: %s" % f
-	try:
-		auth = file(f)
-		access_tokens = simplejson.load(auth)
-		auth.close()
-	except:
-		access_tokens = None
-		print "Authentication failed"
+tools.enable_debug()
+access_tokens = tools.file_auth()
 
-CONSUMER_KEY = 'Ai5tJWvg0UEnPNzOoDrP8A'
-CONSUMER_SECRET = 'LAWbNw7ovHBHES6ymBLCWjx28oZT3wLRRB8PBV7sk'
+twitter = tools.twitter_auth(access_tokens)
+print "Input text to tweet: ",
+text = sys.stdin.readline().strip()
+writable = tb.Writable()
+writable.output = text
+writable.actions = ['default']
+twitter.write(writable)
 
-print "Welcome to Twibots, please pick one of the options below"
-print "1. Tweet hello world via Twibots"
-print "2. Tweet any text of your input"
-print "3. Tweet into two different Twitter accounts"
-print "4. Tweet links from an RSS feed"
-print "5. Search and retweet something"
-print "0. Exit"
-print
-print "Choice: ",
-choice = sys.stdin.readline().strip()
-print
-
-def twitter_auth(try_auth_file=True):
-	
-	if try_auth_file:
-		global access_tokens
-		if access_tokens:
-			twitter = channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET, access_tokens=access_tokens)
-			if twitter.verify_credentials():
-				print "Auth file accepted, proceeding"
-				return twitter
-				
-			else:
-				print "Auth file invalid, going manual"
-	
-	if tb.Channel.fake:
-		return channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
-
-	twitter = channels.Twitter(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET)
-	print "Register here: %s" % twitter.register()
-	print "Verification code: ",
-	oauth_verifier = sys.stdin.readline()
-	twitter.validate(oauth_verifier.strip())
-	print "You are now verified: @%s" % twitter.screen_name
-	print "Would you like to save your tokens? (yes/no): ",
-	choice = sys.stdin.readline().strip()
-	
-	if choice == 'yes':
-		print "Input filename: ",
-		filename = sys.stdin.readline().strip()
-		f = file(filename, 'w')
-		simplejson.dump(twitter.access_tokens, f)
-		f.close()
-	
-	return twitter
-
-def hello_world():
-	print "Welcome to Hello World!"
-	twitter = twitter_auth()
-	print "I will now tweet Hello World from your Twitter account"
-	
-	writable = tb.Writable()
-	writable.output = "Hello World!"
-	twitter.write(writable)
-	
-	print "Done, exiting..."
-
-def input_text():
-	print "Tweet anything you like, authenticate first"
-	twitter = twitter_auth()
-	print "Input text to tweet: ",
-	text = sys.stdin.readline().strip()
-	
-	writable = tb.Writable()
-	writable.output = text
-	writable.actions = ['default']
-	print "Tweeting: %s" % text
-	twitter.write(writable)
-	
-	print "Done, exiting..."
-	
-def dual_account():
-	print "Dual account, authenticate first account"
-	twitter1 = twitter_auth()
-	print "Cool, now the second one please"
-	twitter2 = twitter_auth()
-	print "Nice, so what would you like to tweet from both accounts?"
-	print "Tweet: ",
-	
-	text = sys.stdin.readline().strip()
-	writable = tb.Writable()
-	writable.output = text
-	
-	print "Tweeting from first account"
-	twitter1.write(writable)
-	print "Tweeting from second account"
-	twitter2.write(writable)
-	
-	print "Done, exiting..."
+exit()
 	
 def rss():
 	print "And now an RSS feed, input some RSS feed URLs and type 'go' when you're ready."
@@ -200,15 +103,3 @@ def retweet():
 			time.sleep(5)
 		
 	print "Done, exiting..."
-	
-options = {
-	'1': hello_world,
-	'2': input_text,
-	'3': dual_account,
-	'4': rss,
-	'5': retweet,
-	'0': exit
-}
-
-options[choice]()
-exit()

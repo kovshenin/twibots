@@ -1,3 +1,4 @@
+import logging
 import core as tb
 import extras.twitter as twitter
 import urllib2
@@ -25,7 +26,6 @@ class Twitter(tb.Channel):
 		else:
 			self.authenticated = True
 			self.api = twitter.OAuthApi(self.consumer_key, self.consumer_secret, self.access_tokens['oauth_token'], self.access_tokens['oauth_token_secret'])
-			self.verify_credentials()
 
 	def verify_credentials(self):
 		"""
@@ -34,7 +34,7 @@ class Twitter(tb.Channel):
 			to restore session.
 		"""
 		try:
-			self.api('account/verify_credentials')
+			self.screen_name = self.api('account/verify_credentials')['screen_name']
 			return True
 		except urllib2.HTTPError:
 			raise TwitterUnauthorized
@@ -97,7 +97,7 @@ class Twitter(tb.Channel):
 		"""
 			Writes a tweet invoking statuses/update call.
 		"""
-		print "Tweeting (%s): %s" % (len(writable.output), writable.output)
+		logging.debug("Tweeting (%s): %s" % (len(writable.output), writable.output))
 		try:
 			if not writable.output:
 				raise TwitterNothingToTweet
@@ -113,23 +113,21 @@ class Twitter(tb.Channel):
 			Retweets a message in the writable, tweet_id has to be present
 			in the writable.
 		"""
-		if self.fake:
-			print "Retweeting @%s: %s" % (writable.author, writable.title)
+		logging.debug("Retweeting @%s: %s" % (writable.author, writable.title))
 
 	def list(self, writable):
 		"""
 			Lists a user to a specific list, list_name has to be present
 			in the writable.
 		"""
-		if self.fake:
-			print "Listing: @%s" % writable.author
+		logging.debug("Listing: @%s" % writable.author)
 		
 	def follow(self, writable):
 		"""
 			Follows a user, author or author_id has to be present in
 			the writable.
 		"""
-		print "Following: @%s" % writable.author
+		logging.debug("Following: @%s" % writable.author)
 		if not self.fake:
 			try:
 				self.api.post('friendships/create', {'screen_name': writable.author})
