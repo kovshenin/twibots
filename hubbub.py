@@ -15,6 +15,7 @@
 	 
 	 If you don't have an .auth file, use the auth.py script to generate one.
 """
+import logging
 import sys
 import time
 import random

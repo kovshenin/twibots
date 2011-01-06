@@ -103,8 +103,11 @@ while(True):
 			interval = random.randrange(60,300)
 			logging.debug("Sleeping %s" % interval)
 			time.sleep(interval)
-
+		else:
+			interval = random.randrange(300,600)
+			logging.debug("Sleeping %s" % interval)
+			time.sleep(interval)
 	except KeyboardInterrupt:
 		exit()
 	except:
-		logging.error("Some error occoured, skipping one life cycle")
+		logging.debug("Some error occoured, skipping one life cycle")
