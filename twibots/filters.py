@@ -1,3 +1,4 @@
+import logging
 import core as tb
 import urllib, urllib2
 import simplejson
@@ -40,7 +41,7 @@ class NoDuplicates(tb.Filter):
 		
 		for item in self.cache:
 			if Levenshtein.ratio(str(item), str(writable.title)) > self.threshold:
-				print "Duplicate detected: \"%s\" matched \"s%s\" with a score of %s" % (writable.title, item, Levenshtein.ratio(str(item), str(writable.title)))
+				logging.debug("Duplicate detected: \"%s\" matched \"s%s\" with a score of %s" % (writable.title, item, Levenshtein.ratio(str(item), str(writable.title))))
 				return tb.Writable()
 				
 		self.cache.append(writable.title)
