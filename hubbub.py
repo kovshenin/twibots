@@ -20,10 +20,6 @@ import simplejson
 from twibots import tb, sources, filters, channels
 from twibots import tools
 
-# Log everything into a file.
-log_file = file("log.txt", "a+")
-sys.stdout = log_file
-
 # Enable the --debug key.
 tools.enable_debug()
 
@@ -40,14 +36,14 @@ twitter = tools.twitter_auth(access_tokens)
 # use it later to save the cache.
 if '--cache' in sys.argv:
 	cache_filename = sys.argv[sys.argv.index('--cache')+1]
-	print "Using cache file: %s" % cache_filename
+	logging.debug("Using cache file: %s" % cache_filename)
 	try:
 		cache = file(cache_filename)
 		cache_values = simplejson.load(cache)
 		cache.close()
 	except:
 		cache_values = []
-		print "Cache load failed (empty?)"
+		logging.debug("Cache load failed (empty?)")
 
 # Create the Twibot.
 twibot = tb.Twibot()
@@ -75,7 +71,7 @@ for life in twibot.live():
 	pass
 
 # Let's save the cache into the given file.
-print "Saving cache.."
+logging.debug("Saving cache..")
 f = file(cache_filename, 'w')
 simplejson.dump(nodups.cache, f)
 f.close()
