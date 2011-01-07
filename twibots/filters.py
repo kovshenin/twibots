@@ -39,9 +39,11 @@ class NoDuplicates(tb.Filter):
 		if len(self.cache) > self.cache_size:
 			self.cache = self.cache[-self.cache_size:]
 		
+		one = writable.title.encode("utf-8")
 		for item in self.cache:
-			if Levenshtein.ratio(str(item), str(writable.title)) > self.threshold:
-				logging.debug("Duplicate detected: \"%s\" matched \"s%s\" with a score of %s" % (writable.title, item, Levenshtein.ratio(str(item), str(writable.title))))
+			two = item.encode("utf-8")
+			if Levenshtein.ratio(one, two) > self.threshold:
+				logging.debug("Duplicate detected: \"%s\" matched \"s%s\" with a score of %s" % (one, two, Levenshtein.ratio(one, two)))
 				return tb.Writable()
 				
 		self.cache.append(writable.title)
@@ -200,6 +202,8 @@ if __name__ == '__main__':
 		tb.Writable(title="#Android App Development - Using Android resources part 1: String Resources http://bit.ly/gRKe52"),
 		tb.Writable(title="RT @mashable: 8 #Gadgets to Watch in 2011 - http://bit.ly/123456"),
 		tb.Writable(title="LivingSocial: Groupon Can Hire a Company CFO: http://bit.ly/99921"),
+		tb.Writable(title=u"A Graphic Designer\u2019s Dilemma: How to Prevent Revisions & Other Client Issues"),
+		tb.Writable(title=u"A Graphic Designer\u2019s Dilemma: How to Prevent Revisions & Other Client Issues"),
 	]
 	nodups = NoDuplicates()
 	print "Input:"

@@ -111,5 +111,5 @@ while(True):
 			time.sleep(interval)
 	except KeyboardInterrupt:
 		exit()
-	except:
-		logging.debug("Some error occoured, skipping one life cycle")
+	except Exception, e:
+		logging.debug("Some error occoured, skipping one life cycle: %s" % e)
