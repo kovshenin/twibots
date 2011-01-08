@@ -25,7 +25,10 @@ class YouTubeEmbed(tb.Filter):
 	"""
 	def filter(self, writable):
 		import re
-		search = re.search(r'(http://(www\.|img\.)?youtube\.com/vi?/(.{11}))', writable.content)
+		
+		content = writable.content if len(writable.content) > len(writable.summary) else writable.summary
+		
+		search = re.search(r'(http://(www\.|img\.)?youtube\.com/vi?/(.{11}))', content)
 		if search:
 			url, t, youtube_id = search.groups()
 			if url and youtube_id:
