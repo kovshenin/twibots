@@ -16,7 +16,23 @@ class Bitly(tb.Filter):
 			writable.permalink = response['data']['url']
 
 		return writable
-		
+
+class YouTubeEmbed(tb.Filter):
+	"""
+		If the content contains a YouTube video, this filter will change
+		the writable's permalink to a shortened YouTube link to the video.
+		This will create embedded content in Twitter.
+	"""
+	def filter(self, writable):
+		import re
+		search = re.search(r'(http://(www\.|img\.)?youtube\.com/vi?/(.{11}))', writable.content)
+		if search:
+			url, t, youtube_id = search.groups()
+			if url and youtube_id:
+				writable.permalink = 'http://youtu.be/%s' % youtube_id
+
+		return writable
+	
 class NoRetweets(tb.Filter):
 	def filter(self, writable):
 		if 'rt' in writable.title.lower().split():
@@ -43,7 +59,7 @@ class NoDuplicates(tb.Filter):
 		for item in self.cache:
 			two = item.encode("utf-8")
 			if Levenshtein.ratio(one, two) > self.threshold:
-				logging.debug("Duplicate detected: \"%s\" matched \"s%s\" with a score of %s" % (one, two, Levenshtein.ratio(one, two)))
+				logging.debug("Duplicate detected: \"%s\" matched \"%s\" with a score of %s" % (one, two, Levenshtein.ratio(one, two)))
 				return tb.Writable()
 				
 		self.cache.append(writable.title)

@@ -63,7 +63,7 @@ class RssFeed(tb.Source):
 		feed['entries'] = reversed(feed['entries'][:self.count])
 		
 		for item in feed['entries']:
-
+			
 			if item.title in self.cache:
 				continue
 				
@@ -83,6 +83,8 @@ class RssFeed(tb.Source):
 			)
 			
 			writable.actions = self.actions
+			writable.summary=item.summary
+			writable.content=item.content[0].value
 			
 			yield writable
 
@@ -109,7 +111,7 @@ class TwitterSearch(tb.Source):
 			yield writable
 
 if __name__ == '__main__':
-	feed = RssFeed(feed_url='http://news.google.com/news?pz=1&cf=all&ned=us&hl=en&q=google+nexus&cf=all&scoring=n&output=rss')
+	feed = RssFeed(feed_url='http://techcrunch.com/feed')
 	while(True):
 		for entry in feed.read():
 			print entry.title

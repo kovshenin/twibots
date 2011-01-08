@@ -60,6 +60,7 @@ twitter.filters.append(nodups)
 twitter.filters.append(filters.Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d'))
 twitter.filters.append(filters.InlineHashtags())
 twitter.filters.append(filters.TagsToHashtags())
+twitter.filters.append(filters.YouTubeEmbed())
 twitter.filters.append(filters.Trim140(max_length=100))
 
 # Create an RSS feed source (Atom).
