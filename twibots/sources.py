@@ -83,8 +83,8 @@ class RssFeed(tb.Source):
 			)
 			
 			writable.actions = self.actions
-			writable.summary=item.summary
-			writable.content=item.content[0].value
+			if 'summary' in item: writable.summary=item.summary
+			if 'content' in item: writable.content=item.content[0].value
 			
 			yield writable
 
