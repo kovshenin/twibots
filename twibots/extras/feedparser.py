@@ -1602,7 +1602,7 @@ class _HTMLSanitizer(_BaseHTMLProcessor):
       'ins', 'kbd', 'label', 'legend', 'li', 'map', 'menu', 'ol', 'optgroup',
       'option', 'p', 'pre', 'q', 's', 'samp', 'select', 'small', 'span', 'strike',
       'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'textarea', 'tfoot', 'th',
-      'thead', 'tr', 'tt', 'u', 'ul', 'var']
+      'thead', 'tr', 'tt', 'u', 'ul', 'var', 'object', 'media', 'embed']
 
     acceptable_attributes = ['abbr', 'accept', 'accept-charset', 'accesskey',
       'action', 'align', 'alt', 'axis', 'border', 'cellpadding', 'cellspacing',
@@ -1613,7 +1613,7 @@ class _HTMLSanitizer(_BaseHTMLProcessor):
       'multiple', 'name', 'nohref', 'noshade', 'nowrap', 'prompt', 'readonly',
       'rel', 'rev', 'rows', 'rowspan', 'rules', 'scope', 'selected', 'shape', 'size',
       'span', 'src', 'start', 'summary', 'tabindex', 'target', 'title', 'type',
-      'usemap', 'valign', 'value', 'vspace', 'width']
+      'usemap', 'valign', 'value', 'vspace', 'width', 'object', 'media', 'embed']
 
     unacceptable_elements_with_end_tag = ['script', 'applet']
 

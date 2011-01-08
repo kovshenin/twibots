@@ -111,7 +111,7 @@ class TwitterSearch(tb.Source):
 			yield writable
 
 if __name__ == '__main__':
-	feed = RssFeed(feed_url='http://techcrunch.com/feed')
+	feed = RssFeed(feed_url='http://www.google.com/reader/public/atom/user/08886841141873836783/state/com.google/broadcast')
 	while(True):
 		for entry in feed.read():
 			print entry.title

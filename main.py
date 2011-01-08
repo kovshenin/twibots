@@ -15,7 +15,7 @@ access_tokens = tools.file_auth()
 
 twitter = tools.twitter_auth(access_tokens)
 
-rss = sources.RssFeed(feed_url='http://techcrunch.com/feed', count=10)
+rss = sources.RssFeed(feed_url='http://www.google.com/reader/public/atom/user/08886841141873836783/state/com.google/broadcast', count=10)
 
 twitter.filters.append(filters.NoRetweets())
 twitter.filters.append(filters.NoDuplicates())
