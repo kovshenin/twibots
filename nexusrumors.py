@@ -60,7 +60,8 @@ twibot = tb.Twibot()
 twitter.filters.append(filters.NoDuplicates())
 
 # Used for shortening links, please don't abuse my bit.ly credentials.
-twitter.filters.append(filters.Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d'))
+#twitter.filters.append(filters.Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d'))
+twitter.filters.append(filters.Googl(api_key='AIzaSyCa0M20tZw89pBcYU6XM6Qa_k6_sduBMhI'))
 
 # Some feeds don't come with categories, thus we can provide a set of
 # so called additional or possible tags that may be in the title. We

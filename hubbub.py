@@ -57,7 +57,8 @@ nodups.cache = cache_values
 
 # Append some filters including the no duplicates filter.
 twitter.filters.append(nodups)
-twitter.filters.append(filters.Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d'))
+#twitter.filters.append(filters.Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d'))
+twitter.filters.append(filters.Googl(api_key='AIzaSyCa0M20tZw89pBcYU6XM6Qa_k6_sduBMhI'))
 twitter.filters.append(filters.InlineHashtags())
 twitter.filters.append(filters.TagsToHashtags())
 twitter.filters.append(filters.YouTubeEmbed())
