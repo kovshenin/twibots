@@ -32,7 +32,7 @@ access_tokens = tools.file_auth()
 # Try the access values, create a twitter object. If access credentials
 # are invalid, this will take you through the OAuth registration
 # process and ask to save tokens to file at the end.
-twitter = tools.twitter_auth(access_tokens)
+twitter = tools.twitter_auth(access_tokens, CONSUMER_KEY='QDEynLeQO02GDrfVAGgBcw', CONSUMER_SECRET='ZrLAECDSbNHNMNcApjXeSoEmcjllltEME0g3fV2chuk') # Let's use Google Reader
 
 # Let's look for the --cache "file.cache" key in the command line args.
 # If they exist we can load the cache data from the file, otherwise
