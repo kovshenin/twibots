@@ -85,8 +85,8 @@ twitter.filters.append(filters.Trim140(max_length=100))
 logging.debug("Reading RSS sources and caching initial data.")
 for url in rss_sources:
 	rss = sources.RssFeed(feed_url=url, count=5)
-	#for item in rss.read():
-	#	pass
+	for item in rss.read():
+		pass
 
 	twibot.sources.append(rss)
 
