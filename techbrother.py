@@ -152,7 +152,7 @@ while(True):
 					response = urllib2.urlopen(url)
 					response = simplejson.loads(response.read())
 					clicks = response['analytics']['allTime']['shortUrlClicks']
-					logging.debug("Popularity: %s %s (%s total clicks)" % (item.title, item.permalink, clicks)
+					logging.debug("Popularity: %s %s (%s total clicks)" % (item.title, item.permalink, clicks))
 				except urllib2.HTTPError:
 					logging.error("Some error occured in popularity contest...")
 				except KeyError:
