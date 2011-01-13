@@ -30,6 +30,7 @@
 	and it will not use your Twitter account to actually tweet (fake).
 """
 import logging
+import threading
 import sys
 import time
 import random
@@ -80,11 +81,12 @@ twitter.filters.append(filters.Trim140(max_length=100))
 # Append our sources, 5 items from each source. We'll read the current
 # items in order to cache them inside the RssFeed objects, so that
 # finally we tweet only new entries.
+
 logging.debug("Reading RSS sources and caching initial data.")
 for url in rss_sources:
 	rss = sources.RssFeed(feed_url=url, count=5)
-	for item in rss.read():
-		pass
+	#for item in rss.read():
+	#	pass
 
 	twibot.sources.append(rss)
 
@@ -98,19 +100,65 @@ twibot.sources.append(search)
 # Append the channel.
 twibot.channels.append(twitter)
 
-# On-going.
-logging.debug("Techbrother now alive!")
+class Worker(threading.Thread):
+	def __init__(self, items=[]):
+		threading.Thread.__init__(self)
+		self.items = items
+		self.stop = False
+		
+	def run(self):
+		# On-going.
+		logging.debug("Techbrother now alive!")
+		while not self.stop:
+			try:
+				for writable in twibot.live():
+					
+					# append tweets
+					if 'tweet' in writable.actions or 'default' in writable.actions:
+						self.items.append(writable)
+					
+					if self.stop:
+						break
+					
+					interval = random.randrange(60,300)
+					logging.debug("Sleeping %s" % interval)
+					#time.sleep(interval)
+					time.sleep(60)
+				else:
+					interval = random.randrange(300,600)
+					logging.debug("Sleeping %s" % interval)
+					#time.sleep(interval)
+					time.sleep(60)
+			except KeyboardInterrupt:
+				break
+			except Exception, e:
+				logging.debug("Some error occoured, skipping one life cycle: %s" % e)
+			
+			logging.debug("Interrupted (stop signalled), exiting.")
+
+items = [] # Let's do a popularity contest
+t = Worker(items)
+t.start()
+
 while(True):
+	from datetime import datetime, timedelta
+	import urllib2
+	
 	try:
-		for life in twibot.live():
-			interval = random.randrange(60,300)
-			logging.debug("Sleeping %s" % interval)
-			time.sleep(interval)
-		else:
-			interval = random.randrange(300,600)
-			logging.debug("Sleeping %s" % interval)
-			time.sleep(interval)
-	except KeyboardInterrupt:
-		exit()
-	except Exception, e:
-		logging.debug("Some error occoured, skipping one life cycle: %s" % e)
+		for item in items:
+			if (datetime.now() - item.timestamp).seconds > 3600: # writable is at least 3600 seconds old
+				url = 'https://www.googleapis.com/urlshortener/v1/url?key=%s&shortUrl=%s&projection=ANALYTICS_CLICKS' % ('AIzaSyCa0M20tZw89pBcYU6XM6Qa_k6_sduBMhI', item.permalink)
+				try:
+					response = urllib2.urlopen(url)
+					response = simplejson.loads(response.read())
+					clicks = response['analytics']['allTime']['shortUrlClicks']
+					logging.debug("Popularity: %s %s (%s total clicks)" % (item.title, item.permalink, clicks)
+				except urllib2.HTTPError, KeyError:
+					logging.error("Some error occured in popularity contest...")
+					pass
+
+				items.remove(item)
+
+		time.sleep(600)
+	finally:
+		t.stop = True

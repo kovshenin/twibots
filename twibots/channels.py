@@ -87,6 +87,8 @@ class Twitter(tb.Channel):
 				method(writable)
 			else:
 				raise TwitterActionNotImplemented
+				
+		return writable
 
 	# Default action
 	def default(self, writable):
