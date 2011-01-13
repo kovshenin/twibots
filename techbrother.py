@@ -153,7 +153,7 @@ while(True):
 					response = simplejson.loads(response.read())
 					clicks = response['analytics']['allTime']['shortUrlClicks']
 					logging.debug("Popularity: %s %s (%s total clicks)" % (item.title, item.permalink, clicks)
-				except urllib2.HTTPError, KeyError:
+				except (urllib2.HTTPError, KeyError):
 					logging.error("Some error occured in popularity contest...")
 					pass
 
