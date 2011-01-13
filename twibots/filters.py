@@ -16,6 +16,25 @@ class Bitly(tb.Filter):
 			writable.permalink = response['data']['url']
 
 		return writable
+		
+class Googl(tb.Filter):
+	def __init__(self, api_key):
+		self.api_key = api_key
+		
+	def filter(self, writable):
+		url = 'https://www.googleapis.com/urlshortener/v1/url?key=%s' % self.api_key
+		post_data = '{"longUrl": "%s"}' % writable.permalink
+		req = urllib2.Request(url=url, data=post_data)
+		req.add_header('Content-Type', 'application/json')
+		
+		try:
+			response = urllib2.urlopen(req)
+			response = simplejson.loads(response.read())
+			writable.permalink = response['id']
+		except (urllib2.HTTPError, KeyError):
+			pass
+
+		return writable
 
 class YouTubeEmbed(tb.Filter):
 	"""
@@ -188,6 +207,15 @@ class Trim140(tb.Filter):
 
 # Self-test code.
 if __name__ == '__main__':
+	# Googl
+	print "Googl()"
+	googl = Googl(api_key="AIzaSyCa0M20tZw89pBcYU6XM6Qa_k6_sduBMhI")
+	writable = tb.Writable(permalink='http://kovshenin.com')
+	print "Long link: http://kovshenin.com"
+	print "Shortened: %s" % googl.filter(writable).permalink
+	
+	exit()
+	
 	# Bitly
 	print "Bitly()"
 	bitly = Bitly(username='kovshenin', api_key='R_9f3bde0c5e2d36a3e747490bb37a6d5d')
