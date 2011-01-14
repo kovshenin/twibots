@@ -122,13 +122,11 @@ class Worker(threading.Thread):
 					
 					interval = random.randrange(60,300)
 					logging.debug("Sleeping %s" % interval)
-					#time.sleep(interval)
-					time.sleep(60)
+					time.sleep(interval)
 				else:
 					interval = random.randrange(300,600)
 					logging.debug("Sleeping %s" % interval)
-					#time.sleep(interval)
-					time.sleep(60)
+					time.sleep(interval)
 			except KeyboardInterrupt:
 				break
 			except Exception, e:
@@ -140,11 +138,11 @@ items = [] # Let's do a popularity contest
 t = Worker(items)
 t.start()
 
-while(True):
-	from datetime import datetime, timedelta
-	import urllib2
-	
-	try:
+try:
+	while(True):
+		from datetime import datetime, timedelta
+		import urllib2
+		
 		for item in items:
 			if (datetime.now() - item.timestamp).seconds > 3600: # writable is at least 3600 seconds old
 				url = 'https://www.googleapis.com/urlshortener/v1/url?key=%s&shortUrl=%s&projection=ANALYTICS_CLICKS' % ('AIzaSyCa0M20tZw89pBcYU6XM6Qa_k6_sduBMhI', item.permalink)
@@ -153,13 +151,11 @@ while(True):
 					response = simplejson.loads(response.read())
 					clicks = response['analytics']['allTime']['shortUrlClicks']
 					logging.debug("Popularity: %s %s (%s total clicks)" % (item.title, item.permalink, clicks))
-				except urllib2.HTTPError:
-					logging.error("Some error occured in popularity contest...")
-				except KeyError:
-					logging.error("Some error occured in popularity contest...")
+				except urllib2.HTTPError, KeyError:
+					logging.error("Some error occured in popularity contest. URL was: %s" % item.permalink)
 
 				items.remove(item)
 
 		time.sleep(600)
-	finally:
-		t.stop = True
+finally:
+	t.stop = True
