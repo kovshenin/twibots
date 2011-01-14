@@ -122,11 +122,18 @@ class Worker(threading.Thread):
 					
 					interval = random.randrange(60,300)
 					logging.debug("Sleeping %s" % interval)
-					time.sleep(interval)
+					for i in range(interval):
+						if self.stop:
+							break
+						time.sleep(1)
 				else:
 					interval = random.randrange(300,600)
 					logging.debug("Sleeping %s" % interval)
-					time.sleep(interval)
+					for i in range(interval):
+						if self.stop:
+							break
+						time.sleep(1)
+						
 			except KeyboardInterrupt:
 				break
 			except Exception, e:
