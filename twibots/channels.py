@@ -136,6 +136,18 @@ class Twitter(tb.Channel):
 			except urllib2.HTTPError:
 				pass # 403 -- already following
 			
+	def unfollow(self, writable):
+		"""
+			Unfollow a user, author or author_id has to be present in
+			the writable.
+		"""
+		logging.debug("Unfollowing: @%s" % writable.author)
+		if not self.fake:
+			try:
+				self.api.post('friendships/destroy', {'screen_name': writable.author})
+			except urllib2.HTTPError:
+				logging.error("Could not unfollow.")
+				pass
 	
 # Self-test code.
 if __name__ == '__main__':
