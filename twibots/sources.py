@@ -58,6 +58,7 @@ class RssFeed(tb.Source):
 		try:
 			feed = feedparser.parse(self.feed_url)
 		except LookupError:
+			logging.error("Cannot parse feed: %s, LookupError" % self.feed_url)
 			raise StopIteration
 		
 		if not len(feed['entries']):
