@@ -55,7 +55,11 @@ class RssFeed(tb.Source):
 			self.cache = self.cache[-10:]
 
 		logging.debug("Reading RSS Feed: %s" % self.feed_url)
-		feed = feedparser.parse(self.feed_url)
+		try:
+			feed = feedparser.parse(self.feed_url)
+		except LookupError:
+			raise StopIteration
+		
 		if not len(feed['entries']):
 			logging.error("There's something wrong with the feed: %s" % self.feed_url)
 			raise StopIteration
