@@ -5,10 +5,13 @@ import random
 import simplejson
 import core as tb
 import sources, filters, channels
+from datetime import datetime
 
 def enable_debug(log_filename='twibots.log'):
 	if '--debug' in sys.argv:
 		logging.basicConfig(filename=log_filename,level=logging.DEBUG)
+		sys.stderr = open("err.%s" % log_filename, 'a+')
+		sys.stderr.write("\n\n-- Started logging %s --\n" % datetime.now())
 	if '--fake' in sys.argv:
 		tb.Channel.fake = True
 
