@@ -161,7 +161,10 @@ try:
 				except urllib2.HTTPError, KeyError:
 					logging.error("Some error occured in popularity contest. URL was: %s" % item.permalink)
 
-				items.remove(item)
+				try:
+					items.remove(item)
+				except TypeError:
+					logging.error("Type error on line 166, again... Items length: %s" % len(items))
 
 		time.sleep(600)
 finally:
