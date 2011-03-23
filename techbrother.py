@@ -52,6 +52,9 @@ rss_sources = [
 	'http://mashable.com/feed',
 	'http://techcrunch.com/feed',
 	'http://kovshenin.com/feed',
+	'http://feeds.feedburner.com/readwriteweb',
+	'http://feeds.feedburner.com/CrunchGear',
+	'http://feeds2.feedburner.com/tripwiremagazine',
 	'http://www.google.com/reader/public/atom/user/08886841141873836783/state/com.google/broadcast', # This is an atom feed of my shared items on Google Reader
 ]
 
@@ -94,8 +97,12 @@ for url in rss_sources:
 search = sources.TwitterSearch(twitter, q='#tech OR #wordpress OR #webdesign OR #jquery', count=2)
 search.actions = ['follow']
 
-# Append the search source.
+retweet = sources.TwitterSearch(twitter, q='from:kovshenin filter:links', count=1)
+retweet.actions = ['retweet']
+
+# Append the search and retweet source.
 twibot.sources.append(search)
+twibot.sources.append(retweet)
 
 # Append the channel.
 twibot.channels.append(twitter)
@@ -139,7 +146,7 @@ class Worker(threading.Thread):
 			except Exception, e:
 				logging.debug("Some error occoured, skipping one life cycle: %s" % e)
 			
-			logging.debug("Interrupted (stop signalled), exiting.")
+		logging.debug("Interrupted (stop signalled), exiting.")
 
 items = [] # Let's do a popularity contest
 t = Worker(items)

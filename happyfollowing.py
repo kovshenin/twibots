@@ -2,6 +2,7 @@
 
 """
 """
+import urllib2
 import logging
 import threading
 import sys
@@ -48,16 +49,20 @@ while next_cursor:
 		if not friend['id'] in followers:
 			non_followers += 1
 			print "(%s/%s) " % (total_friends, account_friends),
-			print "%s (@%s) is not following you, unfollow? (y/n): " % (friend['name'], friend['screen_name']),
-			choice = sys.stdin.readline().strip().lower()
+			#print "%s (@%s) is not following you, unfollow? (y/n): " % (friend['name'], friend['screen_name']),
+			choice = 'y'#sys.stdin.readline().strip().lower()
 			if choice.startswith('y'):
 				unfollowed_count += 1
 				unfollowed.append(friend['screen_name'])
 				print "Unfollowing @%s" % friend['screen_name']
+				try:
+					twitter.api.post('friendships/destroy', {'screen_name': friend['screen_name']})
+				except urllib2.HTTPError as e:
+					print "HTTP Error: %s" % e
+					
+				time.sleep(5)
 
 print "%s out of %s of your friends did not follow you back" % (non_followers, total_friends)
 print "You have unfollowed %s of them" % len(unfollowed)
 
-print "Backup created: %s" % filename
-	
 print "\n\n\nThank you for using this script, happy following!"
