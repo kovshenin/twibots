@@ -56,7 +56,7 @@ rss_sources = [
 	'http://www.inspiredm.com/feed/',
 	'http://rss1.smashingmagazine.com/feed/',
 	'http://feeds.feedburner.com/Noupe',
-	'http://feeds2.feedburner.com/webdesignerdepot?format=html',
+	'http://feeds2.feedburner.com/webdesignerdepot',
 	'http://feeds2.feedburner.com/SixRevisions',
 	'http://feeds2.feedburner.com/designmag',
 	'http://feeds2.feedburner.com/designmag',
@@ -192,7 +192,7 @@ try:
 					response = urllib2.urlopen(url)
 					response = simplejson.loads(response.read())
 					clicks = response['analytics']['allTime']['shortUrlClicks']
-					logging.debug("Popularity: %s %s (%s total clicks)" % (item.title, item.permalink, clicks))
+					logging.debug("Popularity: %s clicks\t %s %s" % (clicks, item.title, item.permalink))
 				except urllib2.HTTPError, KeyError:
 					logging.error("Some error occured in popularity contest. URL was: %s" % item.permalink)
 

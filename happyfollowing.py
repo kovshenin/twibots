@@ -31,6 +31,8 @@ while next_cursor:
 	next_cursor = followers_chunk['next_cursor']
 	time.sleep(2)
 	
+# followers = [] # Let's go hardcore :)
+	
 print "You've got %s followers" % len(followers)
 print "Gathering your friends, 100 at a time"
 
