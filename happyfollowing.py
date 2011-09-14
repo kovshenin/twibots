@@ -31,7 +31,7 @@ while next_cursor:
 	next_cursor = followers_chunk['next_cursor']
 	time.sleep(2)
 	
-# followers = [] # Let's go hardcore :)
+followers = [] # Let's go hardcore :)
 	
 print "You've got %s followers" % len(followers)
 print "Gathering your friends, 100 at a time"
@@ -56,13 +56,15 @@ while next_cursor:
 			if choice.startswith('y'):
 				unfollowed_count += 1
 				unfollowed.append(friend['screen_name'])
-				print "Unfollowing @%s" % friend['screen_name']
 				try:
 					twitter.api.post('friendships/destroy', {'screen_name': friend['screen_name']})
+					print "Unfollowed: @%s (Rate: %s/%s)" % (
+						friend['screen_name'], twitter.api.ratelimit_remaining, twitter.api.ratelimit
+					)
 				except urllib2.HTTPError as e:
 					print "HTTP Error: %s" % e
 					
-				time.sleep(5)
+				#time.sleep(5)
 
 print "%s out of %s of your friends did not follow you back" % (non_followers, total_friends)
 print "You have unfollowed %s of them" % len(unfollowed)
