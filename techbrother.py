@@ -154,7 +154,7 @@ class Worker(threading.Thread):
 					if self.stop:
 						break
 					
-					interval = random.randrange(60,300)
+					interval = random.randrange(600,3000)
 					logging.debug("Sleeping %s" % interval)
 					for i in range(interval):
 						if self.stop:
