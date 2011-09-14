@@ -121,14 +121,14 @@ for url in rss_sources:
 	twibot.sources.append(rss)
 
 # Let's also run a Twitter search and follow some users
-search = sources.TwitterSearch(twitter, q='#tech OR #wordpress OR #webdesign OR #jquery', count=1)
-search.actions = ['follow']
+# search = sources.TwitterSearch(twitter, q='', count=2)
+# search.actions = ['retweet']
 
-retweet = sources.TwitterSearch(twitter, q='from:kovshenin filter:links', count=1)
+retweet = sources.TwitterSearch(twitter, q='#tech OR #wordpress OR #webdesign OR #jquery OR #design lang:en filter:links', count=2)
 retweet.actions = ['retweet']
 
 # Append the search and retweet source.
-twibot.sources.append(search)
+# twibot.sources.append(search)
 twibot.sources.append(retweet)
 
 # Append the channel.

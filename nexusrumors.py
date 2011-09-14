@@ -87,8 +87,8 @@ for url in rss_sources:
 	twibot.sources.append(rss)
 
 # Let's also run a Twitter search and follow some users
-search = sources.TwitterSearch(twitter, q='#nexus OR #android', count=2)
-search.actions = ['follow']
+search = sources.TwitterSearch(twitter, q='#nexus OR #android OR #iphone OR #ios filter:links lang:en', count=2)
+search.actions = ['retweet']
 
 # Append the search source.
 twibot.sources.append(search)
