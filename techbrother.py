@@ -59,7 +59,6 @@ rss_sources = [
 	'http://feeds2.feedburner.com/webdesignerdepot',
 	'http://feeds2.feedburner.com/SixRevisions',
 	'http://feeds2.feedburner.com/designmag',
-	'http://feeds2.feedburner.com/designmag',
 	'http://feeds.feedburner.com/speckboy-design-magazine',
 	'http://feeds.feedburner.com/WebDesignLedger',
 	'http://feeds2.feedburner.com/24thfloor',

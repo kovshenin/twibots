@@ -7,6 +7,7 @@ class TwitterInvalidVerifier(): pass
 class TwitterUnauthorized(): pass
 class TwitterNothingToTweet(): pass
 class TwitterActionNotImplemented(): pass
+class TwitterRateLimited(): pass
 	
 class Twitter(tb.Channel):
 	"""
@@ -36,7 +37,11 @@ class Twitter(tb.Channel):
 		try:
 			self.screen_name = self.api('account/verify_credentials')['screen_name']
 			return True
-		except urllib2.HTTPError:
+		except urllib2.HTTPError as e:
+			#if e.code == 400:
+			#	print e.getheaders()
+			#	exit()
+				
 			raise TwitterUnauthorized
 
 	def register(self):
@@ -116,6 +121,18 @@ class Twitter(tb.Channel):
 			in the writable.
 		"""
 		logging.debug("Retweeting @%s: %s" % (writable.author, writable.title))
+		
+		if not self.fake:
+			self.api.post('statuses/retweet/%s' % writable.tweet_id)
+			
+	def destroy(self, writable):
+		"""
+			Destroys a tweet, tweet_id has to be present in the writable.
+		"""
+		logging.debug("Destroying %s" % writable.tweet_id)
+		
+		if not self.fake:
+			self.api.post('statuses/destroy/%s' % writable.tweet_id)
 
 	def list(self, writable):
 		"""

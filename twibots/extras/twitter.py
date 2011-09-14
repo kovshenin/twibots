@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# 
+#
 # Copyright under  the latest Apache License 2.0
 
 '''
@@ -25,10 +25,10 @@ import logging
 
 # Non library modules
 try:
-	import simplejson
+    import simplejson
 except:
-	from django.utils import simplejson
-	
+    from django.utils import simplejson
+
 import oauth2 as oauth
 
 # Taken from oauth implementation at: http://github.com/harperreed/twitteroauth-python/tree/master
@@ -39,14 +39,14 @@ SIGNIN_URL = 'http://twitter.com/oauth/authenticate'
 
 class OAuthApi():
     def __init__(self, consumer_key, consumer_secret, token=None, token_secret=None):
-    	if token and token_secret:
-    		token = oauth.Token(token, token_secret)
-    	else:
-    		 token = None
+        if token and token_secret:
+            token = oauth.Token(token, token_secret)
+        else:
+             token = None
         self._Consumer = oauth.Consumer(consumer_key, consumer_secret)
         self._signature_method = oauth.SignatureMethod_HMAC_SHA1()
-        self._access_token = token 
-        
+        self._access_token = token
+    
     # Extensions by Konstantin Kovshenin <kovshenin@gmail.com>
     def __call__(self, call, method='GET', parameters={}):
         return self.ApiCall(call, type=method, parameters=parameters)
@@ -55,54 +55,63 @@ class OAuthApi():
     def get(self, call, parameters={}):
         return self.ApiCall(call, type='GET', parameters=parameters)
 
-
+    
     def _GetOpener(self):
         opener = urllib2.build_opener()
         return opener
-
+    
     def _FetchUrl(self,
                     url,
                     http_method=None,
                     parameters=None):
         '''Fetch a URL, optionally caching for a specified time.
-    
+        
         Args:
           url: The URL to retrieve
-          http_method: 
-          	One of "GET" or "POST" to state which kind 
-          	of http call is being made
+          http_method:
+              One of "GET" or "POST" to state which kind
+              of http call is being made
           parameters:
-            A dict whose key/value pairs should encoded and added 
+            A dict whose key/value pairs should encoded and added
             to the query string, or generated into post data. [OPTIONAL]
             depending on the http_method parameter
-    
+        
         Returns:
           A string containing the body of the response.
         '''
         # Build the extra parameters dict
         extra_params = {}
         if parameters:
-          extra_params.update(parameters)
+            extra_params.update(parameters)
         
-        req = self._makeOAuthRequest(url, params=extra_params, 
+        req = self._makeOAuthRequest(url, params=extra_params,
                                                     http_method=http_method)
         
         # Get a url opener that can handle Oauth basic auth
         opener = self._GetOpener()
-
+        
         if http_method == "POST":
             encoded_post_data = req.to_postdata()
             #url = req.get_normalized_http_url()
         else:
             url = req.to_url()
             encoded_post_data = ""
-            
+        
         if encoded_post_data:
-        	url_data = opener.open(url, encoded_post_data).read()
+            response = opener.open(url, encoded_post_data)
+            url_data = response.read()
         else:
-        	url_data = opener.open(url).read()
-        	opener.close()
-    
+            response = opener.open(url)
+            url_data = response.read()
+            opener.close()
+        
+        if 'X-RateLimit-Limit' in response.headers:
+            self.ratelimit = response.headers.getheader('X-RateLimit-Limit')
+        if 'X-RateLimit-Remaining' in response.headers:
+            self.ratelimit_remaining = response.headers.getheader('X-RateLimit-Remaining')
+        if 'X-RateLimit-Reset' in response.headers:
+	        self.ratelimit_reset = response.headers.getheader('X-RateLimit-Reset')
+        
         # Always return the latest version
         return url_data
     
@@ -136,15 +145,15 @@ class OAuthApi():
         request = oauth.Request(method=http_method,url=url,parameters=params)
         request.sign_request(self._signature_method, self._Consumer, token)
         return request
-
+    
     def getAuthorizationURL(self, token, url=AUTHORIZATION_URL):
         '''Create a signed authorization URL
         
         Returns:
-          A signed OAuthRequest authorization URL 
+          A signed OAuthRequest authorization URL
         '''
         return "%s?oauth_token=%s" % (url, token['oauth_token'])
-
+    
     def getRequestToken(self, url=REQUEST_TOKEN_URL):
         '''Get a Request Token from Twitter
         
@@ -154,12 +163,12 @@ class OAuthApi():
         resp, content = oauth.Client(self._Consumer).request(url, "GET")
         if resp['status'] != '200':
             raise Exception("Invalid response %s." % resp['status'])
-		
-		# Python 2.5 support
+        
+        # Python 2.5 support
         l = []
         for pair in content.split('&'):
-		    l.append(tuple(pair.split('=')))
-		    
+            l.append(tuple(pair.split('=')))
+        
         return dict(l)
     
     def getAccessToken(self, token, verifier, url=ACCESS_TOKEN_URL):
@@ -177,8 +186,8 @@ class OAuthApi():
         # Python 2.5 support
         l = []
         for pair in content.split('&'):
-			l.append(tuple(pair.split('=')))
-			
+            l.append(tuple(pair.split('=')))
+        
         return dict(l)
     
     def FollowUser(self, user_id, options = {}):
@@ -188,125 +197,125 @@ class OAuthApi():
         options:
               A dict of options for the friendships/create call.
               See the link below for what options can be passed
-              http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-friendships%C2%A0create           
+              http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-friendships%C2%A0create
         '''
         options['user_id'] = user_id
         self.ApiCall("friendships/create", "POST", options)
-
+    
     def GetFriends(self, options={}):
-    	'''Return a list of users you are following
-    	
-    	Args:
-    	options:
-          	A dict of options for the statuses/friends call.
-          	See the link below for what options can be passed
-          	http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses%C2%A0friends	
-
-    	options['cursor']:
-    		By default twitter returns a list of 100
-    		followers. If you have more, you will need to
-    		use the cursor value to paginate the results.
-    		A value of -1 means to get the first page of results.
-    		
-    		the returned data will have next_cursor and previous_cursor
-    		to help you continue pagination          	
-    		
+        '''Return a list of users you are following
+        
+        Args:
+        options:
+              A dict of options for the statuses/friends call.
+              See the link below for what options can be passed
+              http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses%C2%A0friends
+        
+        options['cursor']:
+            By default twitter returns a list of 100
+            followers. If you have more, you will need to
+            use the cursor value to paginate the results.
+            A value of -1 means to get the first page of results.
+            
+            the returned data will have next_cursor and previous_cursor
+            to help you continue pagination
+        
         Return: Up to 100 friends in dict format
-    	'''
-    	return self.ApiCall("statuses/friends", "GET", options)    
+        '''
+        return self.ApiCall("statuses/friends", "GET", options)
     
     def GetFollowers(self, options={}):
-    	'''Return followers
-    	
-    	Args:
-    	options:
-          	A dict of options for the statuses/followers call.
-          	See the link below for what options can be passed
-          	http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses%C2%A0followers
-          	
-          	
-    	options['cursor']:
-    		By default twitter returns a list of 100
-    		followers. If you have more, you will need to
-    		use the cursor value to paginate the results.
-    		A value of -1 means to get the first page of results.
-    		
-    		the returned data will have next_cursor and previous_cursor
-    		to help you continue pagination
-    		          		
+        '''Return followers
+        
+        Args:
+        options:
+              A dict of options for the statuses/followers call.
+              See the link below for what options can be passed
+              http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses%C2%A0followers
+              
+        
+        options['cursor']:
+            By default twitter returns a list of 100
+            followers. If you have more, you will need to
+            use the cursor value to paginate the results.
+            A value of -1 means to get the first page of results.
+            
+            the returned data will have next_cursor and previous_cursor
+            to help you continue pagination
+        
         Return: Up to 100 followers in dict format
-    	'''
-    	return self.ApiCall("statuses/followers", "GET", options)
+        '''
+        return self.ApiCall("statuses/followers", "GET", options)
     
     def GetFriendsTimeline(self, options = {}):
-    	'''Get the friends timeline. Does not contain retweets.
-    	
+        '''Get the friends timeline. Does not contain retweets.
+          
           Args:
           options:
-          	A dict of options for the statuses/friends_timeline call.
-          	See the link below for what options can be passed
-          	http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses-friends_timeline	
-         
+              A dict of options for the statuses/friends_timeline call.
+              See the link below for what options can be passed
+              http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses-friends_timeline
+          
           Return: The friends timeline in dict format
-    	'''
-    	return self.ApiCall("statuses/friends_timeline", "GET", options)
+        '''
+        return self.ApiCall("statuses/friends_timeline", "GET", options)
     
     def GetHomeTimeline(self, options={}):
-    	'''Get the home timeline. Unlike friends timeline it also contains retweets
-    	
+        '''Get the home timeline. Unlike friends timeline it also contains retweets
+          
           Args:
           options:
-          	A dict of options for the statuses/home_timeline call.
-          	See the link below for what options can be passed
-          	http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses-home_timeline
-          	
-          Return: The home timeline in dict format	
-    	'''
-    	return self.ApiCall("statuses/home_timeline", "GET", options)    
+              A dict of options for the statuses/home_timeline call.
+              See the link below for what options can be passed
+              http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses-home_timeline
+          
+          Return: The home timeline in dict format
+        '''
+        return self.ApiCall("statuses/home_timeline", "GET", options)
     
     def GetUserTimeline(self, options={}):
-    	'''Get the user timeline. These are tweets just by a user, and do not contain retweets
-    	
+        '''Get the user timeline. These are tweets just by a user, and do not contain retweets
+          
           Args:
           options:
-          	A dict of options for the statuses/user_timeline call.
-          	See the link below for what options can be passed
-          	http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses-user_timeline
-          	
-          Return: The home timeline in dict format	
-    	'''
-    	return self.ApiCall("statuses/user_timeline", "GET", options)    
+              A dict of options for the statuses/user_timeline call.
+              See the link below for what options can be passed
+              http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses-user_timeline
+          
+          Return: The home timeline in dict format
+        '''
+        return self.ApiCall("statuses/user_timeline", "GET", options)
     
     def GetPublicTimeline(self):
-    	'''
-    		Get the public timeline, which is the 20 most recent statuses from non-protected
-    		and custom icon users.  According to the API docs, this is cached for 60 seconds.
-          	
-          Return: The public timeline in dict format	
-    	'''
-    	return self.ApiCall("statuses/public_timeline", "GET", {})     
+        '''
+            Get the public timeline, which is the 20 most recent statuses from non-protected
+            and custom icon users.  According to the API docs, this is cached for 60 seconds.
+          
+          Return: The public timeline in dict format
+        '''
+        return self.ApiCall("statuses/public_timeline", "GET", {})
     
     def UpdateStatus(self, status, options = {}):
-    	'''
+        '''
         Args:
           status: The status you wish to update to
           options:
-          	A dict of options for the statuses/update call.
-          	See the link below for what options can be passed
-          	http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses%C2%A0update
+              A dict of options for the statuses/update call.
+              See the link below for what options can be passed
+              http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses%C2%A0update
         Returns:
           Whether or not the status update suceeded
-    	'''
-    	options['status'] = status
-    	self.ApiCall("statuses/update", "POST", options)    
+        '''
+        options['status'] = status
+        self.ApiCall("statuses/update", "POST", options)
     
     def UsersShow(self, screen_name, options = {}):
-		options['screen_name'] = screen_name
-		return self.ApiCall("users/show", "GET", options)
+        options['screen_name'] = screen_name
+        return self.ApiCall("users/show", "GET", options)
     
     def ApiCall(self, call, type="GET", parameters={}):
         '''Calls the twitter API
-        
+       
        Args:
           call: The name of the api call (ie. account/rate_limit_status)
           type: One of "GET" or "POST"
@@ -318,5 +327,5 @@ class OAuthApi():
             json = self._FetchUrl("https://search.twitter.com/" + call + ".json", type, parameters)
         else:
             json = self._FetchUrl("https://api.twitter.com/1/" + call + ".json", type, parameters)
-			
+        
         return simplejson.loads(json)
