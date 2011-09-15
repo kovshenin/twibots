@@ -162,6 +162,14 @@ class InlineHashtags(tb.Filter):
 
 		return writable
 
+class RemoveTags(tb.Filter):
+	"""
+		Removes all tags from a writable.
+	"""
+	def filter(self, writable):
+		writable.tags = []
+		return writable
+
 class Trim140PermalinkTooLong(): pass
 class Trim140(tb.Filter):
 	"""
