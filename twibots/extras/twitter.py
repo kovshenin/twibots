@@ -79,8 +79,6 @@ class OAuthApi():
         Returns:
           A string containing the body of the response.
         '''
-        if 'status' in parameters:
-          parameters['status'] = parameters['status'].encode('utf-8')
 
         # Build the extra parameters dict
         extra_params = {}
